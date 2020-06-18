@@ -37,8 +37,8 @@ class Brizy_Public_Main {
 			return self::$instance;
 		}
 
-		if(!$post) {
-			throw new Exception('Unable to create Brizy_Public_Main instance with null post');
+		if ( ! $post ) {
+			throw new Exception( 'Unable to create Brizy_Public_Main instance with null post' );
 		}
 
 		return self::$instance = new self( $post );
@@ -97,8 +97,29 @@ class Brizy_Public_Main {
 			$this->plugin_live_composer_fixes();
 		}
 
+		add_filter( 'brizy_add_page_assets', array( $this, 'includeBrizyAssets' ), 10, 3 );
 
 		$this->addTheContentFilters();
+	}
+
+	function includeBrizyAssets( $content, $post, $assetsType = 'styles' ) {
+
+		if ( ! ( $post instanceof Brizy_Editor_Post ) ) {
+			return $content;
+		}
+
+		$assets = $assetsType == 'styles' ? $post->getCompiledStyles() : $post->getCompiledScripts();
+
+		$content .= "\n\n";
+
+		foreach ( $assets as $asset ) {
+			if ( $asset['type'] == 'pro' && ! defined( 'BRIZY_PRO_VERSION' ) ) {
+				continue;
+			}
+			$content .= $asset['content'];
+		}
+
+		return $content;
 	}
 
 	/**
@@ -241,6 +262,7 @@ class Brizy_Public_Main {
 			Brizy_Config::BRIZY_TEMPLATE_FILE_NAME
 		) ) ) {
 			$urlBuilder = new Brizy_Editor_UrlBuilder();
+
 			return $urlBuilder->plugin_path( '/public/views/templates/' . $template_path );
 		}
 
@@ -252,7 +274,7 @@ class Brizy_Public_Main {
 		$config_object = $this->getConfigObject();
 
 		$iframe_url = add_query_arg(
-			array( Brizy_Editor::prefix('-edit-iframe') => '' ),
+			array( Brizy_Editor::prefix( '-edit-iframe' ) => '' ),
 			get_permalink( $this->post->getWpPostId() )
 		);
 
@@ -280,8 +302,8 @@ class Brizy_Public_Main {
 
 		$context = apply_filters( 'brizy_editor_page_context', $context );
 
-		if(!$context) {
-			throw new Exception('Invalid template context. Probably a bad filter implementation');
+		if ( ! $context ) {
+			throw new Exception( 'Invalid template context. Probably a bad filter implementation' );
 		}
 
 		echo Brizy_TwigEngine::instance( self::path( 'views' ) )
@@ -317,14 +339,14 @@ class Brizy_Public_Main {
 	 * @return bool
 	 */
 	public function is_editing_page_with_editor() {
-		return ! is_admin() && isset( $_REQUEST[ Brizy_Editor::prefix('-edit') ] ) && $this->post->uses_editor();
+		return ! is_admin() && isset( $_REQUEST[ Brizy_Editor::prefix( '-edit' ) ] ) && $this->post->uses_editor();
 	}
 
 	/**
 	 * @return bool
 	 */
 	public function is_editing_page_with_editor_on_iframe() {
-		return ! is_admin() && isset( $_REQUEST[ Brizy_Editor::prefix('-edit-iframe') ] ) && $this->post->uses_editor();
+		return ! is_admin() && isset( $_REQUEST[ Brizy_Editor::prefix( '-edit-iframe' ) ] ) && $this->post->uses_editor();
 	}
 
 	/**
@@ -338,7 +360,7 @@ class Brizy_Public_Main {
 	 * @return bool
 	 */
 	public function is_view_page() {
-		return ! is_admin() && $this->post->uses_editor() && ! isset( $_GET[ Brizy_Editor::prefix('-edit-iframe') ] ) && ! isset( $_GET[ Brizy_Editor::prefix('-edit') ] );
+		return ! is_admin() && $this->post->uses_editor() && ! isset( $_GET[ Brizy_Editor::prefix( '-edit-iframe' ) ] ) && ! isset( $_GET[ Brizy_Editor::prefix( '-edit' ) ] );
 	}
 
 	/**
@@ -402,7 +424,9 @@ class Brizy_Public_Main {
 			$params['content'] = $head;
 		}
 
+		$params['content'] = apply_filters( 'brizy_add_page_assets', $params['content'], $this->post, 'styles' );
 		$params['content'] = apply_filters( 'brizy_content', $params['content'], Brizy_Editor_Project::get(), $this->post->getWpPost(), 'head' );
+
 
 		echo Brizy_TwigEngine::instance( self::path( 'views' ) )
 		                     ->render( 'head-partial.html.twig', $params );
@@ -438,6 +462,7 @@ class Brizy_Public_Main {
 			$content       = $compiled_page->get_body();
 		}
 
+		$content = apply_filters( 'brizy_add_page_assets', $content, $this->post, 'scripts' );
 		$content = apply_filters( 'brizy_content', $content, Brizy_Editor_Project::get(), $this->post->getWpPost(), 'body' );
 
 		return $content;
