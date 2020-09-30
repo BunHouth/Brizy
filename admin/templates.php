@@ -424,12 +424,14 @@ class Brizy_Admin_Templates {
 				remove_filter( 'the_content', 'wpautop' );
 
 				// insert the compiled head and content
+                add_filter('brizy_head_assets', array(Brizy_Public_Main::class, 'includeHeadAssets'), 10, 2);
+                add_filter('brizy_body_assets', array(Brizy_Public_Main::class, 'includeBodyAssets'), 10, 2);
 				add_filter( 'body_class', array( $this, 'bodyClassFrontend' ) );
-				add_action( 'wp_head', array( $this, 'insertPageHead' ) );
-				add_action( 'brizy_template_content', array( $this, 'insertPageContent' ), - 12000 );
+				add_action( 'wp_head', array( $this, 'insertTemplateHead') );
+				add_action( 'brizy_template_content', array( $this, 'insertTemplateContent'), - 12000 );
 				add_filter( 'the_content', array( $this, 'filterPageContent' ), - 12000 );
 				add_action( 'wp_enqueue_scripts', array( $this, 'enqueue_preview_assets' ), 9999 );
-			}
+            }
 
 		} catch ( Exception $e ) {
 			//ignore
@@ -477,7 +479,7 @@ class Brizy_Admin_Templates {
 	/**
 	 *  Show the compiled page head content
 	 */
-	public function insertPageHead() {
+	public function insertTemplateHead() {
 
 		if ( ! self::getTemplate() ) {
 			return;
@@ -494,7 +496,11 @@ class Brizy_Admin_Templates {
 		$compiled_page = self::getTemplate()->get_compiled_page();
 		$templateHead  = $compiled_page->get_head();
 
-		$templateHead = apply_filters( 'brizy_add_page_assets', $templateHead, self::getTemplate(), 'styles' );
+
+		// include post assets here
+
+
+		$templateHead = apply_filters( 'brizy_head_assets', $templateHead, self::getTemplate() );
 		$head         = apply_filters( 'brizy_content', $templateHead, Brizy_Editor_Project::get(), $post, 'head' );
 		?>
         <!-- BRIZY HEAD -->
@@ -510,7 +516,7 @@ class Brizy_Admin_Templates {
 	 * @return null|string|string[]
 	 * @throws Exception
 	 */
-	public function insertPageContent() {
+	public function insertTemplateContent() {
 
 		if ( ! self::getTemplate() ) {
 			return;
@@ -528,7 +534,7 @@ class Brizy_Admin_Templates {
 
 		$content = $compiled_page->get_body();
 
-		$content = apply_filters( 'brizy_add_page_assets', $content, self::getTemplate(), 'scripts' );
+		$content = apply_filters( 'brizy_body_assets', $content, self::getTemplate() );
 		$content = apply_filters( 'brizy_content', $content, Brizy_Editor_Project::get(), $post, 'body' );
 
 		echo do_shortcode( $content );
