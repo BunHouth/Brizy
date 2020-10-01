@@ -468,7 +468,6 @@ class Brizy_Admin_Templates {
 		do_action( 'brizy_preview_enqueue_scripts' );
 	}
 
-
 	public function bodyClassFrontend( $classes ) {
 
 		$classes[] = 'brz';
@@ -492,13 +491,8 @@ class Brizy_Admin_Templates {
 			$post = get_post( $pid );
 		}
 
-
 		$compiled_page = self::getTemplate()->get_compiled_page();
 		$templateHead  = $compiled_page->get_head();
-
-
-		// include post assets here
-
 
 		$templateHead = apply_filters( 'brizy_head_assets', $templateHead, self::getTemplate() );
 		$head         = apply_filters( 'brizy_content', $templateHead, Brizy_Editor_Project::get(), $post, 'head' );
@@ -508,7 +502,6 @@ class Brizy_Admin_Templates {
         <!-- END BRIZY HEAD -->
 		<?php
 	}
-
 
 	/**
 	 * @param $content

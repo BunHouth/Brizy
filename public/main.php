@@ -153,7 +153,6 @@ class Brizy_Public_Main
 
     public static function includeBodyAssets($content, Brizy_Editor_Post $post)
     {
-
         // get assets list
         $assets = [];
         $scripts = $post->getCompiledScripts();
@@ -551,8 +550,6 @@ class Brizy_Public_Main
             $params['content'] = $head;
         }
 
-        $params['content'] = apply_filters('brizy_head_assets', $params['content'], $this->post);
-
         $params['content'] = apply_filters(
             'brizy_content',
             $params['content'],
@@ -560,7 +557,6 @@ class Brizy_Public_Main
             $this->post->getWpPost(),
             'head'
         );
-
 
         echo Brizy_TwigEngine::instance(self::path('views'))
                              ->render('head-partial.html.twig', $params);
@@ -603,7 +599,6 @@ class Brizy_Public_Main
             $content       = $compiled_page->get_body();
         }
 
-        $content = apply_filters('brizy_body_assets', $content, $this->post);
         $content = apply_filters(
             'brizy_content',
             $content,
