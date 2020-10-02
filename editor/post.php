@@ -271,7 +271,7 @@ class Brizy_Editor_Post extends Brizy_Editor_Entity {
 
 		foreach ($compiledData['pageScripts'] as $i=>$set) { //pro || free
             foreach ($set as $k=>$scripts) { // groups
-                if($k=='libsSelectors') continue;
+                if($k=='libsSelectors' || $k=='main') continue;
                 foreach ($scripts as $l=>$script) {
                     $compiledData['pageScripts'][$i][$k][$l]['content'] = Brizy_SiteUrlReplacer::hideSiteUrl($script['content']);
                 }
@@ -280,7 +280,7 @@ class Brizy_Editor_Post extends Brizy_Editor_Entity {
 		}
 		foreach ($compiledData['pageStyles'] as $i=>$set) {
             foreach ($set as $k=>$styles) {
-                if($k=='libsSelectors') continue;
+                if($k=='libsSelectors' || $k=='main') continue;
                 foreach ($styles as $l=>$style) {
                     $compiledData['pageStyles'][$i][$k][$l]['content'] = Brizy_SiteUrlReplacer::hideSiteUrl(
                         $style['content']
